@@ -15,6 +15,9 @@ for movement in movements:
     for value in movement['values']:
         instances[movement['name']] += [value['google_trend_count']]
 
+with open('data/trends.json', 'w') as f:
+    json.dump(instances, f)
+
 for movement in instances:
     instances[movement] = [float(value) / max(instances[movement]) for value in instances[movement]]
 names = [key for key, value in instances.iteritems()]

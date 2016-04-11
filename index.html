@@ -27,12 +27,19 @@ var svg = d3.select('body').append('svg')
   .attr('width', width)
   .attr('height', height)
 
+var trend = d3.svg.line()
+  .interpolate('basis')
+  .x(function(d,i){ return i / 146.0 * width })
+  .y(function(d){ return 800 - d })
+
 queue(1)
   .defer(d3.json, 'data/movements.json')
   .defer(d3.json, 'data/points.json')
+  .defer(d3.json, 'data/trends.json')
   .awaitAll(function(error, results){
     var movements = results[0]
     var points = results[1]
+    var trends = results[2]
 
     console.log(movements)
 
@@ -41,7 +48,7 @@ queue(1)
     var movementEnter = movement
       .enter()
       .append('g')
-      .attr('transform', function(d,i){ return 'translate(' + (300 + points[d.name][0] * 50) + ',' + (450 + points[d.name][1] * 150) + ')'})
+      .attr('transform', function(d,i){ return 'translate(' + (1000 - (450 + points[d.name][1] * 250)) + ',' + (300 + points[d.name][0] * 50) + ')'})
       .attr('class', function(d){
         var keywords = {}
         d.values.map(function(value, j){
@@ -58,8 +65,18 @@ queue(1)
         return 'movement ' + keys.join(' ')
       })
       .on('mouseover', function(d){
+
         d3.select(this).selectAll('.shell,.label')
           .attr('visibility', 'visible')
+
+        d3.selectAll('.trend').remove()
+        svg.append('path')
+          .attr('stroke-width', 10)
+          .attr('stroke', '#eee')
+          .attr('fill', 'none')
+          .attr('d', trend(trends[d.name]))
+          .attr('class', 'trend')
+
         var classes = d3.select(this).attr('class').split(' ')
         classes.shift()
         if (classes.length == 1) return
@@ -67,6 +84,7 @@ queue(1)
         d3.selectAll('.' + classes)
           .selectAll('.shell,.label')
           .attr('visibility', 'visible')
+
       })
       .on('mouseout', function(d){
         d3.selectAll('.shell,.label').attr('visibility', 'hidden')
