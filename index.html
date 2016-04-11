@@ -114,9 +114,18 @@ queue(1)
               .attr('x', function(d){ return 5 * Math.sqrt(blot.ny_count) + 5 })
               .attr('y', function(d,i){ return 800 - trends[movement.name][dateToValue(blot.date) - 1] + (i * 8) })
               .attr('class', 'keyword')
+
+            if (blot.keywords == 0) return
+            var classes = []
+            blot.keywords.map(function(keyword,k){
+              classes.push(keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase())
+            })
+            classes = classes.join(',.')
+            d3.selectAll('.' + classes).classed('highlighted', true)
           })
           .on('mouseout', function(blot,k){
             d3.selectAll('.keyword').remove()
+            d3.selectAll('.movement:not(.locked)').classed('highlighted', false)
           })
         articleEnter.append('circle')
           .filter(function(d){ return d.ny_count > 0 })
