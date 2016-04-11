@@ -12,6 +12,9 @@ html, body {
   font-size: 8px;
   letter-spacing: 0.5px;
 }
+.movement {
+  cursor: pointer;
+}
 </style>
 <body>
 </body>
@@ -38,11 +41,48 @@ queue(1)
     var movementEnter = movement
       .enter()
       .append('g')
-      .attr('transform', function(d,i){ return 'translate(' + (600 + points[d.name][0] * 100) + ',' + (500 + points[d.name][1] * 150) + ')'})
-      .attr('class', 'movement')
+      .attr('transform', function(d,i){ return 'translate(' + (300 + points[d.name][0] * 50) + ',' + (450 + points[d.name][1] * 150) + ')'})
+      .attr('class', function(d){
+        var keywords = {}
+        d.values.map(function(value, j){
+          value.keywords.map(function(keyword, k){
+            var key = keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase()
+            if (keywords[key] == null) keywords[key] = 1
+            else keywords[key] ++
+          })
+        })
+        var keys = []
+        for (var key in keywords) {
+          if (keywords[key] > 10) keys.push(key)
+        }
+        return 'movement ' + keys.join(' ')
+      })
+      .on('mouseover', function(d){
+        d3.select(this).selectAll('.shell,.label')
+          .attr('visibility', 'visible')
+        var classes = d3.select(this).attr('class').split(' ')
+        classes.shift()
+        if (classes.length == 1) return
+        classes = classes.join(',.')
+        d3.selectAll('.' + classes)
+          .selectAll('.shell,.label')
+          .attr('visibility', 'visible')
+      })
+      .on('mouseout', function(d){
+        d3.selectAll('.shell,.label').attr('visibility', 'hidden')
+      })
+    movementEnter.append('circle')
+      .attr('r', 6.5)
+      .attr('stroke-width', 1)
+      .attr('stroke', '#000')
+      .attr('fill', 'none')
+      .attr('visibility', 'hidden')
+      .attr('class', 'shell')
     movementEnter.append('text')
       .text(function(d){ return d.name })
-      .attr('x', 30)
+      .attr('x', 10)
+      .attr('visibility', 'hidden')
+      .attr('class', 'label')
     movementEnter.each(function(movement, i) {
       var ripples = d3.select(this).selectAll('.ripple')
         .data(movement.values)
@@ -55,10 +95,9 @@ queue(1)
         .attr('opacity', function(d){ return d.google_trend_count / 5000.0 })
         .attr('stroke-width', 1)
         .attr('stroke', function(d){
-          return (d.sentiment < 0) ? 'rgb(255,0,0)' : 'rgb(0,0,255)'
+          return d.sentiment < 0 ? 'rgb(255,0,0)' : 'rgb(0,0,155)'
         })
         .attr('fill', 'none')
-        .attr('cx', 20)
     })
 
   })
