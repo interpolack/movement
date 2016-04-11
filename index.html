@@ -54,7 +54,9 @@ queue(1)
         })
         .attr('opacity', function(d){ return d.google_trend_count / 5000.0 })
         .attr('stroke-width', 1)
-        .attr('stroke', "#000")
+        .attr('stroke', function(d){
+          return (d.sentiment < 0) ? 'rgb(255,0,0)' : 'rgb(0,0,255)'
+        })
         .attr('fill', 'none')
         .attr('cx', 20)
     })
