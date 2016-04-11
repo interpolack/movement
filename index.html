@@ -26,8 +26,10 @@ var svg = d3.select('body').append('svg')
 
 queue(1)
   .defer(d3.json, 'data/movements.json')
+  .defer(d3.json, 'data/points.json')
   .awaitAll(function(error, results){
     var movements = results[0]
+    var points = results[1]
 
     console.log(movements)
 
@@ -36,7 +38,7 @@ queue(1)
     var movementEnter = movement
       .enter()
       .append('g')
-      .attr('transform', function(d,i){ return 'translate(0,' + (i * 20) + ')'})
+      .attr('transform', function(d,i){ return 'translate(' + (600 + points[d.name][0] * 100) + ',' + (500 + points[d.name][1] * 150) + ')'})
       .attr('class', 'movement')
     movementEnter.append('text')
       .text(function(d){ return d.name })
@@ -46,7 +48,6 @@ queue(1)
         .data(movement.values)
       ripples.enter()
         .append('circle')
-        // .each(function(d){ console.log(d.date.split("/")) })
         .attr('r', function(d){
           var split = d.date.split("/")
           return ((parseInt(split[2] - 4) * 12) + parseInt(split[0])) / 25.0
