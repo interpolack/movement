@@ -47,6 +47,10 @@ var svg = d3.select('body').append('svg')
   .on('mousemove', function(){
     mouse = d3.mouse(this)
   })
+  .on('click', function(){
+    d3.selectAll('.article,.trend').attr('opacity', 1).classed('highlighted', false)
+    d3.selectAll('.keyword').remove()
+  })
 var layer1 = svg.append('g')
 var layer2 = svg.append('g')
 var layer3 = svg.append('g')
@@ -113,6 +117,7 @@ queue(1)
       .on('mouseover', function(movement,m){
 
         d3.selectAll('.movement').attr('opacity', 0.1)
+        d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
 
         layer1.append('path')
@@ -138,6 +143,7 @@ queue(1)
           .attr('class', function(d){ return 'article article' + m + ' d' + dateToValue(d.date)})
           .on('mouseover', function(blot,k){
             d3.selectAll('.trend,.article,.movement:not(.locked)').attr('opacity', 0.1).classed('highlighted', false)
+            d3.selectAll('.keyword').remove()
             d3.select(this).attr('opacity', 1)
             var keyword = d3.select(this).selectAll('.keyword')
               .data(blot.keywords)
@@ -180,11 +186,16 @@ queue(1)
             classes = classes.join(',.')
             d3.selectAll('.' + classes + ',.d' + dateToValue(blot.date)).classed('highlighted', true)
           })
-          .on('mouseout', function(blot,k){
-            d3.selectAll('.trend,.article,.movement').attr('opacity', 1)
-            d3.selectAll('.keyword').remove()
-            d3.selectAll('.movement:not(.locked)').classed('highlighted', false)
-          })
+          // .on('mouseout', function(blot,k){
+          //   if (d3.select(this).classed('clocked')) return
+          //   d3.selectAll('.trend,.article,.movement').attr('opacity', 1)
+          //   d3.selectAll('.keyword').remove()
+          //   d3.selectAll('.movement:not(.locked)').classed('highlighted', false)
+          // })
+          // .on('click', function(blot,k){
+          //   var clocked = d3.select(this).classed('clocked')
+          //   d3.select(this).classed('clocked', !clocked)
+          // })
         articleEnter.append('rect')
           .filter(function(d){ return d.ny_count > 0  })
           .attr('x', -5)
