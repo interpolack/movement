@@ -16,6 +16,9 @@ html, body {
 .movement {
   cursor: pointer;
 }
+.movement.highlighted {
+  opacity: 1;
+}
 .movement.highlighted .shell {
   visibility: visible;
 }
@@ -24,6 +27,9 @@ html, body {
 }
 .article {
   cursor: pointer;
+}
+.article.highlighted {
+  opacity: 1;
 }
 </style>
 <body>
@@ -101,10 +107,12 @@ queue(1)
         var locked = d3.select(this).classed('locked')
         self.classed('locked', !locked)
         d3.selectAll('.trend.trend' + i).classed('locked', !locked)
+        d3.selectAll('.article').classed('highlighted', false)
         d3.selectAll('.article.article' + i).classed('locked', !locked)
       })
       .on('mouseover', function(movement,m){
 
+        d3.selectAll('.movement').attr('opacity', 0.1)
         d3.select(this).classed('highlighted', true)
 
         layer1.append('path')
@@ -127,9 +135,9 @@ queue(1)
           .data(movement.values)
         var articleEnter = article.enter().append('g')
           .attr('transform', function(d){ return 'translate(' + ((dateToValue(d.date) - 1) / dates * width) + ',0)'})
-          .attr('class', 'article article' + m)
+          .attr('class', function(d){ return 'article article' + m + ' d' + dateToValue(d.date)})
           .on('mouseover', function(blot,k){
-            d3.selectAll('.trend,.article').attr('opacity', 0.1)
+            d3.selectAll('.trend,.article,.movement:not(.locked)').attr('opacity', 0.1).classed('highlighted', false)
             d3.select(this).attr('opacity', 1)
             var keyword = d3.select(this).selectAll('.keyword')
               .data(blot.keywords)
@@ -170,10 +178,10 @@ queue(1)
               classes.push(keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase())
             })
             classes = classes.join(',.')
-            d3.selectAll('.' + classes).classed('highlighted', true)
+            d3.selectAll('.' + classes + ',.d' + dateToValue(blot.date)).classed('highlighted', true)
           })
           .on('mouseout', function(blot,k){
-            d3.selectAll('.trend,.article').attr('opacity', 1)
+            d3.selectAll('.trend,.article,.movement').attr('opacity', 1)
             d3.selectAll('.keyword').remove()
             d3.selectAll('.movement:not(.locked)').classed('highlighted', false)
           })
@@ -196,10 +204,8 @@ queue(1)
 
       })
       .on('mouseout', function(d){
-        d3.selectAll('.tick').remove()
-        d3.selectAll('.trend:not(.locked)').remove()
-        d3.selectAll('.article:not(.locked)').remove()
-        d3.selectAll('.movement:not(.locked)').classed('highlighted', false)
+        d3.selectAll('.tick,.trend:not(.locked),.article:not(.locked)').remove()
+        d3.selectAll('.movement:not(.locked)').classed('highlighted', false).attr('opacity', 1)
       })
     movementEnter.append('circle')
       .attr('r', 9)
