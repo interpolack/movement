@@ -1,4 +1,6 @@
 <html>
+<script src="js/jquery-1.12.3.min.js"></script>
+<script src="js/jquery.selection.js"></script>
 <script src='js/d3.js'></script>
 <script src='js/queue.js'></script>
 <style>
@@ -31,8 +33,21 @@ html, body {
 .article.highlighted {
   opacity: 1;
 }
+#description{
+  position: absolute;
+  max-width: 500px;
+  margin: 10px;
+  background: #F1F1F1;
+  padding:5px;
+  
+}
+.hidden{
+  display:none;
+}
+
 </style>
 <body>
+  <div id='description' class='unpinned hidden'></div>
 </body>
 <script>
 
@@ -76,12 +91,22 @@ window.onresize = function() {
   height = window.innerHeight
 }
 
+var formatText=function(text){
+  var result=""
+  text=text.replace(/[^a-zA-Z ]/g, " ")
+  var tokens=text.split(/\s+/)
+  for (var i in tokens){
+    result+="<span>"+tokens[i]+'</span> '
+  }
+  return tokens.join(" ");
+}
+
 queue(1)
   .defer(d3.json, 'data/movements.json')
   .defer(d3.json, 'data/points.json')
   .defer(d3.json, 'data/trends.json')
   .awaitAll(function(error, results){
-    var movements = results[0]
+	var movements = results[0]
     var points = results[1]
     var trends = results[2]
 
@@ -96,6 +121,7 @@ queue(1)
         d.values.map(function(value, j){
           value.keywords.map(function(keyword, k){
             var key = keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase()
+            key=key.replace("and"," ")
             if (keywords[key] == null) keywords[key] = 1
             else keywords[key] ++
           })
@@ -113,12 +139,25 @@ queue(1)
         d3.selectAll('.trend.trend' + i).classed('locked', !locked)
         d3.selectAll('.article').classed('highlighted', false)
         d3.selectAll('.article.article' + i).classed('locked', !locked)
+        var description=d3.select('#description').html(formatText(d.definition))
+        if (locked){
+        	description
+        	 .classed('pinned', false)
+        	 .classed('unpinned',true)
+        }
+        else{
+        	description
+              .classed('pinned', true)
+        	  .classed('unpinned',false)
+        }
       })
       .on('mouseover', function(movement,m){
-
         d3.selectAll('.movement').attr('opacity', 0.1)
         d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
+        d3.select('#description.unpinned')
+		  .html(formatText(movement.definition))
+		  .classed('hidden',false)
 
         layer1.append('path')
           .attr('opacity', 1)
@@ -142,6 +181,13 @@ queue(1)
           .attr('transform', function(d){ return 'translate(' + ((dateToValue(d.date) - 1) / dates * width) + ',0)'})
           .attr('class', function(d){ return 'article article' + m + ' d' + dateToValue(d.date)})
           .on('mouseover', function(blot,k){
+        	  
+        	d3.select('#description')
+    		  .html(formatText(blot.summary))
+    		  .classed('pinned',false)
+    		  .classed('unpinned',true)
+    		  .classed('hidden',false)
+    		  
             d3.selectAll('.trend,.article,.movement:not(.locked)').attr('opacity', 0.1).classed('highlighted', false)
             d3.selectAll('.keyword').remove()
             d3.select(this).attr('opacity', 1)
@@ -215,6 +261,7 @@ queue(1)
 
       })
       .on('mouseout', function(d){
+    	d3.select('#description.unpinned').classed('hidden',true);
         d3.selectAll('.tick,.trend:not(.locked),.article:not(.locked)').remove()
         d3.selectAll('.movement:not(.locked)').classed('highlighted', false).attr('opacity', 1)
       })
@@ -243,5 +290,11 @@ queue(1)
     })
 
   })
+  
+$('#description').click(function() {
+  var keyword=$.selection();
+  var keywordClass= keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase();
+  d3.selectAll('.' + keywordClass ).classed('highlighted', true)
+});
 </script>
 </html>
