@@ -75,8 +75,8 @@ html, body {
     <br>let's try another movement by mousing over a star that's nearby <span class='m1'>zapatista</span>
   </div>
   <div class='tutorialA textbox hidden fades'>
-    the <b>line chart</b> shows this movement's
-    <br><b>google search queries</b> over time
+    the <b>line chart</b> shows how many times people
+    <br><b>searched google</b> for the selected movementf
   </div>
   <div class='tutorialB textbox hidden fades'>
     the capsules along it represent groups of <b>new york times articles</b>
@@ -169,18 +169,21 @@ queue(1)
       .attr('transform', function(d,i){ return 'translate(' + (1000 - (450 + points[d.name][1] * 250)) + ',' + (300 + points[d.name][0] * 50) + ')'})
       .attr('class', function(d){
         var keywords = {}
+        var total = 0
         d.values.map(function(value, j){
           value.keywords.map(function(keyword, k){
             var key = keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase()
             key=key.replace("and"," ")
             if (keywords[key] == null) keywords[key] = 1
             else keywords[key] ++
+            total ++
           })
         })
         var keys = []
         for (var key in keywords) {
-          if (keywords[key] > 10) keys.push(key)
+          if (keywords[key] > total / 20) keys.push(key)
         }
+        d.keywords = keys
         return 'movement ' + keys.join(' ')
       })
       .on('click', function(d,i){
@@ -230,6 +233,7 @@ queue(1)
         d3.selectAll('.movement').attr('opacity', 0.1)
         d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
+        console.log(movement.keywords)
         if (tutorial >= 5) {
           d3.select('#description.unpinned')
       		  .html(formatText(movement.definition))
