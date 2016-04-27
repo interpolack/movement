@@ -34,7 +34,7 @@ html, body {
   opacity: 1;
 }
 #description{
-  right: 0;
+
 }
 .textbox span {
   font-weight: 700;
@@ -93,9 +93,6 @@ html, body {
   <div class='tutorial4 textbox hidden'>
     each capsule show its related keywords, and also highlights movements related to it by theme
     <br>now, <b>try pinning two movements at once</b> to see how their trends compare
-  </div>
-  <div class='tutorial5 textbox hidden'>
-    now, mouse over blocks at the bottom of the screen to see how the movements relate!
   </div>
   <div id='description' class='unpinned hidden textbox'></div>
 </body>
@@ -233,9 +230,11 @@ queue(1)
         d3.selectAll('.movement').attr('opacity', 0.1)
         d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
-        d3.select('#description.unpinned')
-		  .html(formatText(movement.definition))
-		  .classed('hidden',false)
+        if (tutorial >= 5) {
+          d3.select('#description.unpinned')
+      		  .html(formatText(movement.definition))
+      		  .classed('hidden',false)
+        }
 
         layer1.append('path')
           .attr('opacity', 1)
@@ -267,11 +266,13 @@ queue(1)
               tutorial ++
             }
 
-          	d3.select('#description')
-      		    .html(formatText(blot.summary))
-    		      .classed('pinned',false)
-  		        .classed('unpinned',true)
-		          .classed('hidden',false)
+            if (tutorial >= 5) {
+            	d3.select('#description')
+        		    .html(formatText(blot.summary))
+      		      .classed('pinned',false)
+    		        .classed('unpinned',true)
+  		          .classed('hidden',false)
+            }
 
             d3.selectAll('.trend,.article,.movement:not(.locked)').attr('opacity', 0.1).classed('highlighted', false)
             d3.selectAll('.keyword').remove()
