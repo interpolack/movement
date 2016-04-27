@@ -198,11 +198,11 @@ queue(1)
         }
         var self = d3.select(this)
         var locked = d3.select(this).classed('locked')
+                var description=d3.select('#description').html(formatText(d.definition + '<br><b>keywords:</b> ' + d.keywords))
         self.classed('locked', !locked)
         d3.selectAll('.trend.trend' + i).classed('locked', !locked)
         d3.selectAll('.article').classed('highlighted', false)
         d3.selectAll('.article.article' + i).classed('locked', !locked)
-        var description=d3.select('#description').html(formatText(d.definition))
         if (locked){
         	description
         	 .classed('pinned', false)
@@ -210,7 +210,7 @@ queue(1)
         }
         else{
         	description
-              .classed('pinned', true)
+            .classed('pinned', true)
         	  .classed('unpinned',false)
         }
       })
@@ -233,10 +233,9 @@ queue(1)
         d3.selectAll('.movement').attr('opacity', 0.1)
         d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
-        console.log(movement.keywords)
         if (tutorial >= 5) {
           d3.select('#description.unpinned')
-      		  .html(formatText(movement.definition))
+      		  .html(formatText(movement.definition) + '<br><b>keywords:</b> ' + movement.keywords)
       		  .classed('hidden',false)
         }
 
@@ -272,7 +271,7 @@ queue(1)
 
             if (tutorial >= 5) {
             	d3.select('#description')
-        		    .html(formatText(blot.summary))
+        		    .html(formatText(blot.summary) + '<br><b>keywords:</b> ' + blot.keywords)
       		      .classed('pinned',false)
     		        .classed('unpinned',true)
   		          .classed('hidden',false)
