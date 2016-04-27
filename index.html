@@ -57,10 +57,10 @@ html, body {
 }
 .tutorialA {
   left: 100px;
-  bottom: 200px;
+  bottom: 100px;
 }
 .tutorialB {
-  bottom: 100px;
+  bottom: 50px;
   left: 400px;
 }
 
@@ -122,11 +122,9 @@ var dates = 146.0
 var tutorial = 0
 var m1 = ""
 var m2 = ""
+var chartPos={0:false,1:false,2:false,3:false,4:false}
+var movementScale=d3.scale.linear().domain([4, -5.5]).range([height-200,0]);
 
-var trend = d3.svg.line()
-  .interpolate('cardinal')
-  .x(function(d,i){ return i / dates * width })
-  .y(function(d){ return height - d - 20 })
 
 var dateToValue = function(date) {
   var split = date.split("/")
@@ -166,14 +164,14 @@ queue(1)
     var movementEnter = movement
       .enter()
       .append('g')
-      .attr('transform', function(d,i){ return 'translate(' + (1000 - (450 + points[d.name][1] * 250)) + ',' + (300 + points[d.name][0] * 50) + ')'})
+      .attr('transform', function(d,i){ return 'translate(' + (1000 - (450 + points[d.name][1] * 250)) + ',' + movementScale(points[d.name][0]) + ')'})
       .attr('class', function(d){
         var keywords = {}
         var total = 0
         d.values.map(function(value, j){
           value.keywords.map(function(keyword, k){
-            var key = keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase()
-            key=key.replace("and"," ")
+        	var key=keyword.replace("and"," ")
+            key = key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase()
             if (keywords[key] == null) keywords[key] = 1
             else keywords[key] ++
             total ++
@@ -201,6 +199,7 @@ queue(1)
                 var description=d3.select('#description').html(formatText(d.definition + '<br><b>keywords:</b> ' + d.keywords))
         self.classed('locked', !locked)
         d3.selectAll('.trend.trend' + i).classed('locked', !locked)
+        d3.selectAll('.tick').classed('locked', !locked)
         d3.selectAll('.article').classed('highlighted', false)
         d3.selectAll('.article.article' + i).classed('locked', !locked)
         if (locked){
@@ -213,6 +212,21 @@ queue(1)
             .classed('pinned', true)
         	  .classed('unpinned',false)
         }
+        var j=0;
+        if(locked){
+        	while(chartPos[j]!=i && j<5){
+                j++;
+            }
+        	chartPos[j]=false
+           
+        }
+        else{
+        	while(chartPos[j]!=false && j<5){
+            	j++;
+            }
+            chartPos[j]=i
+        }
+        
       })
       .on('mouseover', function(movement,m){
         m2 = movement.name
@@ -238,7 +252,24 @@ queue(1)
       		  .html(formatText(movement.definition) + '<br><b>keywords:</b> ' + movement.keywords)
       		  .classed('hidden',false)
         }
-
+        var j=0
+        while(chartPos[j]!=false && j<5){
+            j++;
+          }
+        var yScale = d3.scale.linear().domain([0, 500]).range([height-20-j*100,height-200-j*100]);
+        var trend = d3.svg.line()
+        .interpolate('cardinal')
+        .x(function(d,i){ return i / dates * width })
+        .y(function(d){ return yScale(d) })
+		
+        layer1.append('line')
+          .attr("x1",0)
+          .attr("x2",width)
+          .attr("y1",yScale(0))
+          .attr("y2",yScale(0))
+          .attr('stroke', 'whitesmoke')
+          .attr('class', 'trend trend' + m)
+        
         layer1.append('path')
           .attr('opacity', 1)
           .attr('stroke-width', 5)
@@ -247,7 +278,7 @@ queue(1)
           .attr('d', trend(trends[movement.name]))
           .attr('class', 'trend trend' + m)
         layer1.selectAll('.tick')
-          .data([5,6,7,8,9,10,11,12,13,14,15,16])
+          .data([4,5,6,7,8,9,10,11,12,13,14,15,16])
           .enter()
           .append('text')
           .text(function(d){ return 2000 + d })
@@ -298,7 +329,7 @@ queue(1)
                 return 'start'
               })
               .attr('font-weight', 700)
-              .attr('y', function(d,i){ return -8 -20 + height - trends[movement.name][dateToValue(blot.date) - 1] })
+              .attr('y', function(d,i){ return -8+ yScale(trends[movement.name][dateToValue(blot.date) - 1]) })
               .attr('class', 'keyword')
             keywordEnter.append('text')
               .text(function(d){ return d })
@@ -310,7 +341,7 @@ queue(1)
                 if (mouse[0] > width / 2) return 'end'
                 return 'start'
               })
-              .attr('y', function(d,i){ return -20 + height - trends[movement.name][dateToValue(blot.date) - 1] + (i * 8) })
+              .attr('y', function(d,i){ return yScale(trends[movement.name][dateToValue(blot.date) - 1]) + (i * 8) })
               .attr('class', 'keyword')
 
             if (blot.keywords == 0) return
@@ -334,7 +365,7 @@ queue(1)
         articleEnter.append('rect')
           .filter(function(d){ return d.ny_count > 0  })
           .attr('x', -5)
-          .attr('y', function(d,i){ return -20 + height - trends[movement.name][dateToValue(d.date) - 1] - ((Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10) / 2) })
+          .attr('y', function(d,i){ return yScale(trends[movement.name][dateToValue(d.date) - 1]) - ((Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10) / 2) })
           .attr('width', 10)
           .attr('height', function(d){ return Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10  })
           .attr('rx', 5)
@@ -351,7 +382,7 @@ queue(1)
       })
       .on('mouseout', function(d){
     	d3.select('#description.unpinned').classed('hidden',true);
-        d3.selectAll('.tick,.trend:not(.locked),.article:not(.locked)').remove()
+        d3.selectAll('.tick:not(.locked),.trend:not(.locked),.article:not(.locked)').remove()
         d3.selectAll('.movement:not(.locked)').classed('highlighted', false).attr('opacity', 1)
       })
     movementEnter.append('circle')
@@ -364,6 +395,7 @@ queue(1)
     movementEnter.append('text')
       .text(function(d){ return d.name })
       .attr('x', 15)
+      .attr('y', 5)
       .attr('visibility', 'hidden')
       .attr('class', 'label')
     movementEnter.each(function(movement, i) {
