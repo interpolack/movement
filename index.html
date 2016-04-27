@@ -34,20 +34,70 @@ html, body {
   opacity: 1;
 }
 #description{
+  right: 0;
+}
+.textbox span {
+  font-weight: 700;
+}
+.hidden{
+  opacity: 0;
+}
+.fades {
+  -webkit-transition: all 500ms ease-in;
+  -moz-transition: all 500ms ease-in;
+  -o-transition: all 500ms ease-in;
+  transition: all 500ms ease-in;
+}
+.textbox {
   position: absolute;
   max-width: 500px;
   margin: 10px;
   background: #F1F1F1;
   padding:5px;
-  
 }
-.hidden{
-  display:none;
+.tutorialA {
+  left: 100px;
+  bottom: 200px;
+}
+.tutorialB {
+  bottom: 100px;
+  left: 400px;
 }
 
 </style>
 <body>
-  <div id='description' class='unpinned hidden'></div>
+  <div class='tutorial0 textbox'>
+    welcome to <b>social movement</b>
+    <br>to get started, mouse over one of the social movement <b>stars</b>:
+  </div>
+  <div class='tutorial1 textbox hidden'>
+    you're looking at <span class='m1'>zapatista</span></b> and its related movements
+    <br>let's try another movement by mousing over a star that's nearby <span class='m1'>zapatista</span>
+  </div>
+  <div class='tutorialA textbox hidden fades'>
+    the <b>line chart</b> shows this movement's
+    <br><b>google search queries</b> over time
+  </div>
+  <div class='tutorialB textbox hidden fades'>
+    the capsules along it represent groups of <b>new york times articles</b>
+    <br>with <span style='color:#e04f69'>negative</span> or <span style='color:#5070e0'>positive</span> feelings
+  </div>
+  <div class='tutorial2 textbox hidden'>
+    if <span class='m2'>hippie movement</span></b> is nearby, you'll notice that its trends are similar
+    <br>that's because the stars are positioned based on these trends
+    <br>go ahead and click on <span class='m2'>hippie movement</span>
+  </div>
+  <div class='tutorial3 textbox hidden'>
+    now that <span class='m2'>hippie movement</span> is <b>pinned</b>, you can mouse over its blocks at the bottom of the screen
+  </div>
+  <div class='tutorial4 textbox hidden'>
+    each capsule show its related keywords, and also highlights movements related to it by theme
+    <br>now, <b>try pinning two movements at once</b> to see how their trends compare
+  </div>
+  <div class='tutorial5 textbox hidden'>
+    now, mouse over blocks at the bottom of the screen to see how the movements relate!
+  </div>
+  <div id='description' class='unpinned hidden textbox'></div>
 </body>
 <script>
 
@@ -71,6 +121,10 @@ var layer2 = svg.append('g')
 var layer3 = svg.append('g')
 
 var dates = 146.0
+
+var tutorial = 0
+var m1 = ""
+var m2 = ""
 
 var trend = d3.svg.line()
   .interpolate('cardinal')
@@ -133,6 +187,15 @@ queue(1)
         return 'movement ' + keys.join(' ')
       })
       .on('click', function(d,i){
+        if (tutorial == 2) {
+          d3.select('.tutorial2').classed('hidden', true)
+          d3.select('.tutorial3').classed('hidden', false)
+          tutorial ++
+        } else if (tutorial == 4) {
+          d3.select('.tutorial4').classed('hidden', true)
+          d3.select('.tutorial5').classed('hidden', false)
+          tutorial ++
+        }
         var self = d3.select(this)
         var locked = d3.select(this).classed('locked')
         self.classed('locked', !locked)
@@ -152,6 +215,21 @@ queue(1)
         }
       })
       .on('mouseover', function(movement,m){
+        m2 = movement.name
+        d3.selectAll('.m2').html(m2)
+        if (tutorial == 0) {
+          d3.select('.tutorial0').classed('hidden', true)
+          d3.select('.tutorial1').classed('hidden', false)
+          d3.select('.tutorialA').classed('hidden', false)
+          d3.select('.tutorialB').classed('hidden', false)
+          m1 = movement.name
+          d3.selectAll('.m1').html(m1)
+          tutorial ++
+        } else if (tutorial == 1 && m2 != m1) {
+          d3.select('.tutorial1').classed('hidden', true)
+          d3.select('.tutorial2').classed('hidden', false)
+          tutorial ++
+        }
         d3.selectAll('.movement').attr('opacity', 0.1)
         d3.selectAll('.keyword').remove()
         d3.select(this).classed('highlighted', true)
@@ -181,13 +259,20 @@ queue(1)
           .attr('transform', function(d){ return 'translate(' + ((dateToValue(d.date) - 1) / dates * width) + ',0)'})
           .attr('class', function(d){ return 'article article' + m + ' d' + dateToValue(d.date)})
           .on('mouseover', function(blot,k){
-        	  
-        	d3.select('#description')
-    		  .html(formatText(blot.summary))
-    		  .classed('pinned',false)
-    		  .classed('unpinned',true)
-    		  .classed('hidden',false)
-    		  
+            if (tutorial == 3) {
+              d3.select('.tutorial3').classed('hidden', true)
+              d3.select('.tutorialA').classed('hidden', true)
+              d3.select('.tutorialB').classed('hidden', true)
+              d3.select('.tutorial4').classed('hidden', false)
+              tutorial ++
+            }
+
+          	d3.select('#description')
+      		    .html(formatText(blot.summary))
+    		      .classed('pinned',false)
+  		        .classed('unpinned',true)
+		          .classed('hidden',false)
+
             d3.selectAll('.trend,.article,.movement:not(.locked)').attr('opacity', 0.1).classed('highlighted', false)
             d3.selectAll('.keyword').remove()
             d3.select(this).attr('opacity', 1)
@@ -290,7 +375,7 @@ queue(1)
     })
 
   })
-  
+
 $('#description').click(function() {
   var keyword=$.selection();
   var keywordClass= keyword.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\s"'|]/g,"").toLowerCase();
