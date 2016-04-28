@@ -106,8 +106,8 @@ html, body {
   <!-- This div is used for the movement and article blurb descriptions -->
   <div id='description' class='unpinned hidden textbox'></div>
   <!-- These are the axis labels -->
-  <div class='axis' style='left:48%; top:10px'>lasting</div>
-  <div class='axis' style='left:48%; top:80%'>brief</div>
+  <div class='axis' style='left:49%; top:10px'>lasting</div>
+  <div class='axis' style='left:49%; top:80%'>brief</div>
   <div class='axis' style='top:38%; left:50px'>old</div>
   <div class='axis' style='top:38%; right:50px'>new</div>
 </body>
@@ -177,11 +177,13 @@ queue(1)
   .defer(d3.json, 'data/movements.json')
   .defer(d3.json, 'data/points.json')
   .defer(d3.json, 'data/trends.json')
+  .defer(d3.json, 'data/normalized.json')
   .awaitAll(function(error, results){
     // Refer to the JSON data with variables
 	  var movements = results[0]
     var points = results[1]
     var trends = results[2]
+    var normalized = results[3]
 
     // Select all social movements
     var movement = layer2.selectAll('.movement')
@@ -267,7 +269,7 @@ queue(1)
       // Mouse over movement to show related movements
       .on('mouseover', function(movement,m){
         // Advance tutorial if necessary
-        m2 = movement.name
+        if (tutorial < 3) m2 = movement.name
         d3.selectAll('.m2').html(m2)
         if (tutorial == 0) {
           d3.select('.tutorial0').classed('hidden', true)
@@ -299,18 +301,20 @@ queue(1)
         while(chartPos[j]!=false && j<5){
             j++;
           }
-        var yScale = d3.scale.linear().domain([0, 500]).range([height-20-j*100,height-200-j*100]);
+        var yScale = d3.scale.linear()
+          .domain([0, 1])
+          .range([height - 10 - j*100, height - 80 - j*100])
         var trend = d3.svg.line()
         .interpolate('cardinal')
         .x(function(d,i){ return i / dates * width })
         .y(function(d){ return yScale(d) })
 
         // Show the movement's label
-        layer1.append('text')
-          .attr("x",0)
-           .attr('class', 'trend trend' + m)
-          .attr("y",yScale(100))
-          .text(movement.name)
+        layer3.append('text')
+          .attr('x', 2)
+          .attr('class', 'trend trend' + m)
+          .attr('y', yScale(1.1))
+          .text(movement.name + " [" + Math.min.apply(Math, trends[movement.name]) + " " + Math.max.apply(Math, trends[movement.name]) + "]")
 
         // Show the movement's trend
         layer1.append('line')
@@ -325,7 +329,7 @@ queue(1)
           .attr('stroke-width', 5)
           .attr('stroke', '#666')
           .attr('fill', 'none')
-          .attr('d', trend(trends[movement.name]))
+          .attr('d', trend(normalized[movement.name]))
           .attr('class', 'trend trend' + m)
         // Show the annual ticks
         layer1.selectAll('.tick')
@@ -387,7 +391,7 @@ queue(1)
                 return 'start'
               })
               .attr('font-weight', 700)
-              .attr('y', function(d,i){ return -8+ yScale(trends[movement.name][dateToValue(blot.date) - 1]) })
+              .attr('y', function(d,i){ return -8+ yScale(normalized[movement.name][dateToValue(blot.date) - 1]) })
               .attr('class', 'keyword')
             keywordEnter.append('text')
               .text(function(d){ return d })
@@ -399,7 +403,7 @@ queue(1)
                 if (mouse[0] > width / 2) return 'end'
                 return 'start'
               })
-              .attr('y', function(d,i){ return yScale(trends[movement.name][dateToValue(blot.date) - 1]) + (i * 8) })
+              .attr('y', function(d,i){ return yScale(normalized[movement.name][dateToValue(blot.date) - 1]) + (i * 8) })
               .attr('class', 'keyword')
             if (blot.keywords == 0) return
 
@@ -426,7 +430,7 @@ queue(1)
         articleEnter.append('rect')
           .filter(function(d){ return d.ny_count > 0  })
           .attr('x', -5)
-          .attr('y', function(d,i){ return yScale(trends[movement.name][dateToValue(d.date) - 1]) - ((Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10) / 2) })
+          .attr('y', function(d,i){ return yScale(normalized[movement.name][dateToValue(d.date) - 1]) - ((Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10) / 2) })
           .attr('width', 10)
           .attr('height', function(d){ return Math.sqrt(d.ny_count) * 5 > 10 ? Math.sqrt(d.ny_count) * 5 : 10  })
           .attr('rx', 5)

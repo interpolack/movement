@@ -26,6 +26,11 @@ with open('data/trends.json', 'w') as f:
 # normalize each instance's values
 for movement in instances:
     instances[movement] = [float(value) / max(instances[movement]) for value in instances[movement]]
+
+# write the normalized trend values to normalied.json
+with open('data/normalized.json', 'w') as f:
+    json.dump(instances, f)
+
 # keep track of each instance's movement name
 names = [key for key, value in instances.iteritems()]
 instances = numpy.array([value for key, value in instances.iteritems()])
