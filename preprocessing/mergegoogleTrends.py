@@ -1,11 +1,10 @@
 #Merge all the google trend csvs
 import pandas as pd
 import os
-f = open('socialList.txt', 'r')
+f = open('socialList.txt', 'r') #social movement list
 names=[]
 for data in f:
 	names.append(data.strip())
-print len(names)
 i=0
 for name in names:
 	try:

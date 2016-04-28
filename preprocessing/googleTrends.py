@@ -3,16 +3,14 @@ from pytrends.pyGTrends import pyGTrends
 import time
 from random import randint
 
-google_username = ""
-google_password = ""
+google_username = "" #username removed before uploading
+google_password = "" #password removed before uploading
 path=""
 
-print "here"
 # connect to Google
 connector = pyGTrends(google_username, google_password)
-print "here2"
 # make request
-f = open('../socialList.txt', 'r')
+f = open('socialList.txt', 'r')
 i=0
 query=""
 for data in f:
