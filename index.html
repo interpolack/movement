@@ -63,6 +63,14 @@ html, body {
   bottom: 50px;
   left: 400px;
 }
+.axis {
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: #333;
+  position: absolute;
+}
 
 </style>
 <body>
@@ -97,6 +105,11 @@ html, body {
   </div>
   <!-- This div is used for the movement and article blurb descriptions -->
   <div id='description' class='unpinned hidden textbox'></div>
+  <!-- These are the axis labels -->
+  <div class='axis' style='left:48%; top:10px'>lasting</div>
+  <div class='axis' style='left:48%; top:80%'>brief</div>
+  <div class='axis' style='top:38%; left:50px'>old</div>
+  <div class='axis' style='top:38%; right:50px'>new</div>
 </body>
 <script>
 
