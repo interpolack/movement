@@ -1,13 +1,18 @@
 # movement
 Piecing social movements together by their junctures, demonstrating how individual social movements can be interpreted as components of an encompassing narrative.
 
-_data procuration_
-* [Google Trends](https://www.google.com/trends/) was used to retrieve WSQ trends by keyword
-* the [New York Times API](http://developer.nytimes.com/docs) was used to retrieve NYT articles by keyword
+_data procuration `preprocessing/...`_
+* Wikipedia's [List of social movements](https://en.wikipedia.org/wiki/List_of_social_movements) is used to seed the initial movement keywords in `socialList.txt`
+* [pytrends](https://github.com/GeneralMills/pytrends) is used in `googleTrends.py` to retrieve [Google Trends](https://www.google.com/trends/) by keyword
+* the [New York Times API](http://developer.nytimes.com/docs) is used in `nytimesTrends.py` to retrieve NYT articles by keyword
 
-_data processing_
+_data processing `preprocessing/...`_
+* [Pandas](http://pandas.pydata.org/) is used to merge and read CSV files aggregated through `mergeallnydata.py` and `mergegoogletrends.py`
+* [TextBlob](http://textblob.readthedocs.io/en/dev/) is used in `sentiment.py` for sentiment analysis of the aggregated NYT articles
+* [DuckDuckGo](https://duckduckgo.com/) is scraped in `summary.py` to textual summaries of the aggregated NYT articles
+* [NLTK](http://www.nltk.org/) is used in `sentiment.py` and `summary.py` to tokenize strings
 * [scikit's PCA](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) is used in `reduction.py` to reduce trends into two dimensions
 
-_data visualization_
+_data visualization `js/...`_
 * [queue.js](https://github.com/d3/d3-queue) is used to read the data from the `data/*.json` files
-* [d3.js](https://d3js.org/) is used to parse and render the data 
+* [d3.js](https://d3js.org/) is used to parse and render the data
