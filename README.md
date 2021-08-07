@@ -1,6 +1,8 @@
 # movement
 Piecing social movements together by their junctures, demonstrating how individual social movements can be interpreted as components of an encompassing narrative.
 
+View the project [here](https://cdn.githubraw.com/interpolack/movement/master/index.html).
+
 _data procuration `preprocessing/...`_
 * Wikipedia's [List of social movements](https://en.wikipedia.org/wiki/List_of_social_movements) is used to seed the initial movement keywords in `socialList.txt`
 * [pytrends](https://github.com/GeneralMills/pytrends) is used in `googleTrends.py` to retrieve [Google Trends](https://www.google.com/trends/) by keyword
